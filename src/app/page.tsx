@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Container, Row, Col, Form } from 'react-bootstrap';
-import PlotlyMap from '../components/PlotlyMap';
+import HabitatViz from '../components/HabitatViz';
 
 export default function HomePage() {
   // const [showPlants, setShowPlants] = useState(true);
@@ -10,7 +10,7 @@ export default function HomePage() {
 
   return (
     <main>
-      <PlotlyMap />
+      <HabitatViz />
     </main>
     // <main>
     //   <Container fluid className="py-3">
