@@ -268,7 +268,7 @@ export default function UrbanRoadMap() {
             divRef.current,
             [urbanHoverLayer, hotelsLayer] as any,
             layout,
-            { displayModeBar: true, responsive: true }
+            { displayModeBar: true, responsive: true, scrollZoom: true }
           );
         }
       } catch (err) {
