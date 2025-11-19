@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Plotly from 'plotly.js-dist-min';
 
 // --- GeoJSON types ---
@@ -17,132 +17,164 @@ type Feature<T extends FeatureProperties> = {
 };
 type FeatureCollection<T extends FeatureProperties> = { type: 'FeatureCollection'; features: Feature<T>[] };
 
-// --- Component ---
 export default function CombinedMap() {
   const divRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!divRef.current) return;
-    let cancelled = false;
+  const [showPlants, setShowPlants] = useState(false);
+  const [showHabitat, setShowHabitat] = useState(false);
+  const [showEnvironmentalData, setShowEnvironmentalData] = useState(false);
 
-    async function render() {
+  const [plantsGeojson, setPlantsGeojson] = useState<FeatureCollection<FeatureProperties> | null>(null);
+  const [habitatGeojson, setHabitatGeojson] = useState<FeatureCollection<FeatureProperties> | null>(null);
+
+  // --- Fetch GeoJSON datasets ---
+  useEffect(() => {
+    async function fetchData() {
       try {
-        // --- Fetch both GeoJSON datasets ---
         const [plantsResp, habitatResp] = await Promise.all([
           fetch('/datasets/Threatened-Endangered_Plants.geojson'),
           fetch('/datasets/Areas_of_Critical_Habitat_(Consolidated).geojson'),
         ]);
 
-        if (!plantsResp.ok || !habitatResp.ok) {
-          divRef.current!.innerHTML = '<div style="padding:1rem">Failed to load GeoJSON.</div>';
-          return;
-        }
+        if (!plantsResp.ok || !habitatResp.ok) return;
 
-        const plantsGeojson = (await plantsResp.json()) as FeatureCollection<FeatureProperties>;
-        const habitatGeojson = (await habitatResp.json()) as FeatureCollection<FeatureProperties>;
-        if (cancelled) return;
+        const plants = (await plantsResp.json()) as FeatureCollection<FeatureProperties>;
+        const habitat = (await habitatResp.json()) as FeatureCollection<FeatureProperties>;
 
-        // --- Define color mappings ---
         const plantColors: Record<string, string> = { O: '#d9d9d9', L: '#a6cee3', M: '#1f78b4', H: '#b2df8a', VH: '#33a02c', OLO: '#fb9a99' };
-        const habitatColors: Record<string, string> = { Hawaii: '#1f78b4', Oahu: '#33a02c', Maui: '#e31a1c', Kauai: '#ff7f00', Molokai: '#6a3d9a', Lanai: '#b15928' };
-
-        // --- Add fillColor & hoverText ---
-        plantsGeojson.features.forEach(f => {
+        plants.features.forEach(f => {
           const props = f.properties as FeatureProperties & { fillColor?: string; hoverText?: string };
           const density = props.density ?? 'O';
           props.fillColor = plantColors[density] ?? '#cccccc';
           props.hoverText = `Density: ${density}\nArea: ${props.st_areashape?.toLocaleString() ?? 'N/A'}\nPerimeter: ${props.st_perimetershape?.toLocaleString() ?? 'N/A'}`;
         });
 
-        habitatGeojson.features.forEach(f => {
+        const habitatColors: Record<string, string> = { Hawaii: '#1f78b4', Oahu: '#33a02c', Maui: '#e31a1c', Kauai: '#ff7f00', Molokai: '#6a3d9a', Lanai: '#b15928' };
+        habitat.features.forEach(f => {
           const props = f.properties as FeatureProperties & { fillColor?: string; hoverText?: string };
           const isl = props.island ?? '';
           props.fillColor = habitatColors[isl] ?? '#a6cee3';
           props.hoverText = `Island: ${isl}\nCritical Habitat: ${props.critical_h}\nAcres: ${props.acres?.toLocaleString() ?? 'N/A'}\nArea: ${props.st_areashape?.toLocaleString() ?? 'N/A'}\nPerimeter: ${props.st_perimetershape?.toLocaleString() ?? 'N/A'}`;
         });
 
-        // --- Combine all features to compute map center ---
-        const allCoords = [...plantsGeojson.features, ...habitatGeojson.features].flatMap(f =>
-          f.geometry.type === 'Polygon' ? f.geometry.coordinates.flat() : f.geometry.coordinates.flat(2)
-        );
-        const centerLat = allCoords.reduce((s, c) => s + c[1], 0) / allCoords.length;
-        const centerLon = allCoords.reduce((s, c) => s + c[0], 0) / allCoords.length;
-
-        // --- Fill layers ---
-        const fillLayers = [
-          ...plantsGeojson.features.map(f => ({
-            sourcetype: 'geojson' as const,
-            source: { type: 'FeatureCollection', features: [f] },
-            type: 'fill' as const,
-            color: f.properties.fillColor as string,
-            opacity: 0.55,
-            below: 'water',
-          })),
-          ...habitatGeojson.features.map(f => ({
-            sourcetype: 'geojson' as const,
-            source: { type: 'FeatureCollection', features: [f] },
-            type: 'fill' as const,
-            color: f.properties.fillColor as string,
-            opacity: 0.55,
-            below: 'water',
-          })),
-        ];
-
-        // --- Outline layer (combined) ---
-        const outlineLayer = {
-          sourcetype: 'geojson' as const,
-          source: { type: 'FeatureCollection', features: [...plantsGeojson.features, ...habitatGeojson.features] },
-          type: 'line' as const,
-          color: 'black',
-          line: { width: 1 },
-        };
-
-        // --- Scatter layer for hover ---
-        const scatterPoints = {
-          type: 'scattermapbox' as const,
-          lat: [...plantsGeojson.features, ...habitatGeojson.features].map(f => {
-            const coords = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
-            return coords.reduce((s, c) => s + c[1], 0) / coords.length;
-          }),
-          lon: [...plantsGeojson.features, ...habitatGeojson.features].map(f => {
-            const coords = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
-            return coords.reduce((s, c) => s + c[0], 0) / coords.length;
-          }),
-          mode: 'markers' as const,
-          marker: { size: 1, color: 'rgba(0,0,0,0)' },
-          text: [...plantsGeojson.features, ...habitatGeojson.features].map(f => f.properties.hoverText),
-          hovertemplate: '%{text}<extra></extra>',
-        };
-
-        const layout: Partial<Plotly.Layout> = {
-          autosize: true,
-          mapbox: {
-            style: 'open-street-map',
-            center: { lat: centerLat, lon: centerLon },
-            zoom: 7.5,
-            layers: [...fillLayers, outlineLayer],
-          },
-          hovermode: 'closest',
-          margin: { t: 0, l: 0, r: 0, b: 0 },
-        };
-
-        if (divRef.current) {
-          try { (Plotly as any).purge(divRef.current); } catch {}
-          Plotly.newPlot(divRef.current, [scatterPoints] as any, layout, { displayModeBar: true });
-        }
-
+        setPlantsGeojson(plants);
+        setHabitatGeojson(habitat);
       } catch (err) {
-        if (divRef.current) divRef.current.innerHTML = `<div style="padding:1rem">Error loading map: ${err}</div>`;
+        console.error(err);
       }
     }
-
-    render();
-
-    return () => {
-      cancelled = true;
-      if (divRef.current && (Plotly as any).purge) (Plotly as any).purge(divRef.current);
-    };
+    fetchData();
   }, []);
 
-  return <div ref={divRef} style={{ width: '100vw', height: '100vh' }} />;
+  // --- Render Plotly whenever layer visibility or data changes ---
+  useEffect(() => {
+    if (!divRef.current) return;
+
+    const layers: any[] = [];
+
+    const allFeatures: Feature<FeatureProperties>[] = [
+      ...(showPlants && plantsGeojson ? plantsGeojson.features : []),
+      ...(showHabitat && habitatGeojson ? habitatGeojson.features : []),
+    ];
+
+    if (allFeatures.length > 0) {
+      const fillLayers = allFeatures.map(f => ({
+        sourcetype: 'geojson' as const,
+        source: { type: 'FeatureCollection', features: [f] },
+        type: 'fill' as const,
+        color: f.properties.fillColor as string,
+        opacity: 0.55,
+        below: 'water',
+      }));
+
+      const outlineLayer = {
+        sourcetype: 'geojson' as const,
+        source: { type: 'FeatureCollection', features: allFeatures },
+        type: 'line' as const,
+        color: 'black',
+        line: { width: 1 },
+      };
+
+      layers.push(...fillLayers, outlineLayer);
+    }
+
+    // --- Compute center, default to Hawaii if no features ---
+    let centerLat = 20.7;
+    let centerLon = -156.0;
+
+    if (allFeatures.length > 0) {
+      const allCoords = allFeatures.flatMap(f => f.geometry.type === 'Polygon' ? f.geometry.coordinates.flat() : f.geometry.coordinates.flat(2));
+      centerLat = allCoords.reduce((s, c) => s + c[1], 0) / allCoords.length;
+      centerLon = allCoords.reduce((s, c) => s + c[0], 0) / allCoords.length;
+    }
+
+    const scatterPoints = {
+      type: 'scattermapbox' as const,
+      lat: allFeatures.map(f => {
+        const coords = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
+        return coords.reduce((s, c) => s + c[1], 0) / coords.length;
+      }),
+      lon: allFeatures.map(f => {
+        const coords = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
+        return coords.reduce((s, c) => s + c[0], 0) / coords.length;
+      }),
+      mode: 'markers' as const,
+      marker: { size: 1, color: 'rgba(0,0,0,0)' },
+      text: allFeatures.map(f => f.properties.hoverText),
+      hovertemplate: '%{text}<extra></extra>',
+    };
+
+    const layout: Partial<Plotly.Layout> = {
+      autosize: true,
+      mapbox: {
+        style: 'open-street-map',
+        center: { lat: centerLat, lon: centerLon },
+        zoom: 7.5,
+        layers,
+      },
+      hovermode: 'closest',
+      margin: { t: 0, l: 0, r: 0, b: 0 },
+    };
+
+    try { (Plotly as any).purge(divRef.current); } catch {}
+    Plotly.newPlot(divRef.current, [scatterPoints] as any, layout, { displayModeBar: true });
+
+  }, [showPlants, showHabitat, plantsGeojson, habitatGeojson]);
+
+  return (
+    <>
+      {/* --- Collapsible Toggle Bar --- */}
+      <div style={{
+        position: 'fixed',
+        top: 100,
+        right: 20,
+        background: 'white',
+        padding: '1rem',
+        borderRadius: 8,
+        zIndex: 10,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.25)'
+      }}>
+        <div style={{ cursor: 'pointer', fontWeight: 'bold' }} onClick={() => setShowEnvironmentalData(!showEnvironmentalData)}>
+          Environmental Data {showEnvironmentalData ? '▼' : '▶'}
+        </div>
+        {showEnvironmentalData && (
+          <div style={{ marginTop: 8, paddingLeft: 12 }}>
+            <div>
+              <label>
+                <input type="checkbox" checked={showPlants} onChange={e => setShowPlants(e.target.checked)} /> Plant Layer
+              </label>
+            </div>
+            <div>
+              <label>
+                <input type="checkbox" checked={showHabitat} onChange={e => setShowHabitat(e.target.checked)} /> Habitat Layer
+              </label>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* --- Map --- */}
+      <div ref={divRef} style={{ width: '100vw', height: '100vh' }} />
+    </>
+  );
 }
