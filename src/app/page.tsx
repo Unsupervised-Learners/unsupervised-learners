@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Container, Row, Col, Form } from 'react-bootstrap';
-import Merged from '../components/Merged';
+import Environment_Human from '../components/Environment_Human';
 
 export default function HomePage() {
   // const [showPlants, setShowPlants] = useState(true);
@@ -10,7 +10,7 @@ export default function HomePage() {
 
   return (
     <main>
-      <Merged />
+      <Environment_Human />
     </main>
     // <main>
     //   <Container fluid className="py-3">
