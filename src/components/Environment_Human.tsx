@@ -592,7 +592,7 @@ export default function CombinedEverythingMap() {
     const layout: Partial<Plotly.Layout> = {
       autosize: true,
       mapbox: {
-        style: 'open-street-map',
+        style: 'carto-positron',
         center: { lat: centerLat, lon: centerLon },
         zoom: 8.5,
         layers: mapboxLayers,
