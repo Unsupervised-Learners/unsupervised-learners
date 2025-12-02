@@ -5,10 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "dev-https": "next dev --experimental-https",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "playwright-development": "npx playwright test",
-    "lint": "next lint'"
+    "lint": "next lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
