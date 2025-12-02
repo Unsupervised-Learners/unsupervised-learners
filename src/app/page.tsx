@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { Container, Row, Col, Form } from 'react-bootstrap';
-import Environment_Human from '../components/Environment_Human';
+import dynamic from 'next/dynamic';
+
+const Environment_Human = dynamic(() => import('../components/Environment_Human'), {
+  ssr: false,
+});
 
 export default function HomePage() {
 
