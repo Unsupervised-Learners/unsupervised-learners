@@ -599,7 +599,7 @@ export default function CombinedEverythingMap() {
       },
       hovermode: 'closest',
       margin: { t: 0, l: 0, r: 0, b: 0 },
-      showlegend: true,
+      showlegend: false
     };
 
     // Use Plotly.react to update traces + layout cleanly (avoids leftover layers)
