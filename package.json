@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "dev-https": "next dev --experimental-https",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "playwright-development": "npx playwright test"
+    "playwright-development": "npx playwright test",
+    "lint": "next lint"
+
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
