@@ -8,6 +8,7 @@ const Environment_Human = dynamic(() => import('../components/Environment_Human'
   ssr: false,
 });
 
+
 export default function HomePage() {
 
   return (

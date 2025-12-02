@@ -108,34 +108,41 @@ export default function CombinedEverythingMap() {
 
         // Plants
         const plantColors: Record<string, string> = {
-          O: '#d9d9d9',
-          L: '#a6cee3',
-          M: '#1f78b4',
-          H: '#b2df8a',
-          VH: '#33a02c',
-          OLO: '#fb9a99',
+          O: '#dad7cd',
+          L: '#a3b18a',
+          M: '#588157',
+          H: '#3a5a40',
+          VH: '#344e41',
+          OLO: '#8dcc94ff',
         };
         (plants as FeatureCollection<PlantFeature>).features.forEach(f => {
           const p = f.properties as GenericProps & { fillColor?: string; hoverText?: string };
           const density = p.density ?? 'O';
           p.fillColor = plantColors[density] ?? '#cccccc';
-          p.hoverText = `Density: ${density}\nArea: ${p.st_areashape?.toLocaleString() ?? 'N/A'}\nPerimeter: ${p.st_perimetershape?.toLocaleString() ?? 'N/A'}`;
+          p.hoverText =
+          `Density: ${density}<br>` +
+          `Area: ${p.st_areashape?.toLocaleString() ?? 'N/A'}<br>` +
+          `Perimeter: ${p.st_perimetershape?.toLocaleString() ?? 'N/A'}`;
         });
 
         // Habitat
         const habitatColors: Record<string, string> = {
-          Hawaii: '#1f78b4',
-          Oahu: '#33a02c',
-          Maui: '#e31a1c',
-          Kauai: '#ff7f00',
-          Molokai: '#6a3d9a',
-          Lanai: '#b15928',
+          Hawaii: '#e9c46a',
+          Oahu: '#e9c46a',
+          Maui: '#e9c46a',
+          Kauai: '#e9c46a',
+          Molokai: '#e9c46a',
+          Lanai: '#e9c46a',
         };
         (habitat as FeatureCollection<HabitatFeature>).features.forEach(f => {
           const p = f.properties as GenericProps & { fillColor?: string; hoverText?: string };
           const isl = p.island ?? '';
-          p.fillColor = habitatColors[isl] ?? '#a6cee3';
-          p.hoverText = `Island: ${isl}\nCritical Habitat: ${p.critical_h ?? 'N/A'}\nAcres: ${p.acres?.toLocaleString() ?? 'N/A'}\nArea: ${p.st_areashape?.toLocaleString() ?? 'N/A'}\nPerimeter: ${p.st_perimetershape?.toLocaleString() ?? 'N/A'}`;
+          p.fillColor = habitatColors[isl] ?? '#e9c46a';
+          p.hoverText =
+          `Island: ${isl}<br>` +
+          `Acres: ${p.acres?.toLocaleString() ?? 'N/A'}<br>` +
+          `Area: ${p.st_areashape?.toLocaleString() ?? 'N/A'}<br>` +
+          `Perimeter: ${p.st_perimetershape?.toLocaleString() ?? 'N/A'}`;
         });
 
         // Urban: palette by GEOID
@@ -293,7 +300,7 @@ export default function CombinedEverythingMap() {
         // State Parks: add hover text and color
         (stateParks as FeatureCollection<StateParksFeature>).features.forEach(f => {
           const p = f.properties as GenericProps & { fillColor?: string; hoverText?: string };
-          p.fillColor = '#33a02c'; // Green color for parks
+          p.fillColor = '#778da9'; // Green color for parks
           p.hoverText = `Park: ${p.name ?? 'N/A'}<br>Type: ${p.type_defin ?? 'N/A'}<br>Island: ${p.island ?? 'N/A'}<br>Acres: ${p.gis_acre?.toLocaleString() ?? 'N/A'}`;
         });
 
@@ -451,7 +458,7 @@ export default function CombinedEverythingMap() {
         sourcetype: 'geojson' as const,
         source: { type: 'FeatureCollection', features: combinedOutlineFeatures },
         type: 'line' as const,
-        color: 'black',
+        color: 'rgba(0,0,0,0)',
         line: { width: 1 },
       });
     }
@@ -836,11 +843,11 @@ export default function CombinedEverythingMap() {
             <div style={{ marginTop: 8, paddingLeft: 8 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input type="checkbox" checked={showPlants} onChange={e => setShowPlants(e.target.checked)} />
-                <span>Plant Layer</span>
+                <span>Endangered Plants</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
                 <input type="checkbox" checked={showHabitat} onChange={e => setShowHabitat(e.target.checked)} />
-                <span>Habitat Layer</span>
+                <span>Critical Habitats</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
                 <input type="checkbox" checked={showStateParks} onChange={e => setShowStateParks(e.target.checked)} />
