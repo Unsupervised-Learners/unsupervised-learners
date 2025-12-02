@@ -130,7 +130,7 @@ export default function HabitatMap() {
       cancelled = true;
       if (divRef.current && (Plotly as any).purge) (Plotly as any).purge(divRef.current);
     };
-  }, []);
+  }, []); 
 
   return <div ref={divRef} style={{ width: '100vw', height: '100vh' }} />;
 }
