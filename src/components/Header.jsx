@@ -6,15 +6,11 @@ const Header = () => (
     <Container>
       <Col className="text-center">
         EcoMap: Hawaiʻi’s Threatened Plants
-        <br />
-        University of Hawaii
-        <br />
-        Honolulu, HI 96822
-        <br />
+        
         <a href="http://ics-software-engineering.github.io/nextjs-application-template">Template Home Page</a>
       </Col>
     </Container>
   </header>
 );
 
-export default Footer;
+export default Header;
