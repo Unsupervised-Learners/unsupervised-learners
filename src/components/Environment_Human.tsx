@@ -414,6 +414,7 @@ export default function CombinedEverythingMap() {
         type: 'line' as const,
         color: '#000000',
         line: { width: 1 },
+        opacity: 0.6
       });
     }
 
