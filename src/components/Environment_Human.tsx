@@ -108,12 +108,12 @@ export default function CombinedEverythingMap() {
 
         // Plants
         const plantColors: Record<string, string> = {
-          O: '#dad7cd',
-          L: '#a3b18a',
-          M: '#588157',
-          H: '#3a5a40',
-          VH: '#344e41',
-          OLO: '#8dcc94ff',
+          O: '#cad2c5',
+          L: '#84a98c',
+          M: '#52796f',
+          H: '#354f52',
+          VH: '#2f3e46',
+          OLO: '#4f7958ff',
         };
         (plants as FeatureCollection<PlantFeature>).features.forEach(f => {
           const p = f.properties as GenericProps & { fillColor?: string; hoverText?: string };
