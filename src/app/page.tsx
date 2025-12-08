@@ -1,38 +1,44 @@
-'use client';
-
-import { useState } from 'react';
-import { Container, Row, Col, Form } from 'react-bootstrap';
-import dynamic from 'next/dynamic';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import AboutPage from '@/components/AboutPage';
-
-
-const Environment_Human = dynamic(() => import('../components/Environment_Human'), {
-  ssr: false,
-});
-
-const Header_style = dynamic(() => import('../components/Header'), {
-  ssr: false,
-});
-
-const Footer_style = dynamic(() => import('../components/Footer'), {
-  ssr: false,
-});
-
-const AboutPage_style = dynamic(() => import('../components/AboutPage'), {
-  ssr: false,
-});
-
 export default function HomePage() {
-
   return (
-    <main>
-      <Header />
-      <AboutPage />
-      <Environment_Human />
-      <Footer />
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        textAlign: "center",
+        backgroundImage: "url('/images/background4.webp')", 
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        color: "white",
+        paddingTop: "64px",  // header height
+      }}
+    >
+      <h1 style={{ fontSize: "3rem", marginBottom: "1rem", textShadow: "0 2px 6px rgba(0,0,0,0.4)" }}>
+        Welcome!
+      </h1>
 
-    </main>
+      <p style={{ fontSize: "1.25rem", maxWidth: "600px", textShadow: "0 2px 6px rgba(0,0,0,0.4)" }}>
+        Explore endangered plant species and human activity across the Hawaiian Islands.
+      </p>
+
+      <a
+        href="/environment"
+        style={{
+          marginTop: "2rem",
+          padding: "12px 28px",
+          background: "rgba(0,0,0,0.5)",
+          color: "white",
+          borderRadius: "8px",
+          textDecoration: "none",
+          fontSize: "1.1rem",
+          backdropFilter: "blur(4px)",
+        }}
+      >
+        Enter Site
+      </a>
+    </div>
   );
 }
+
