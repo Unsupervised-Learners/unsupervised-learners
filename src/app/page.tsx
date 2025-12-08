@@ -9,7 +9,11 @@ const Environment_Human = dynamic(
 export default function HomePage() {
   return (
     <main>
+      <Header />
+      <AboutPage />
       <Environment_Human />
+      <Footer />
+
     </main>
   );
 }
