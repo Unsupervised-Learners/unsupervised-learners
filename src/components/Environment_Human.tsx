@@ -45,8 +45,18 @@ export default function CombinedEverythingMap() {
   const [showUrban, setShowUrban] = useState(false);
   const [showRoads, setShowRoads] = useState(false);
   const [showHotels, setShowHotels] = useState(false);
-  const [showLULC, setShowLULC] = useState(false);
   const [showStateParks, setShowStateParks] = useState(false);
+  
+  // LULC category toggles
+  const [showUrbanBuiltup, setShowUrbanBuiltup] = useState(false);
+  const [showAgricultural, setShowAgricultural] = useState(false);
+  const [showRangeland, setShowRangeland] = useState(false);
+  const [showForest, setShowForest] = useState(false);
+  const [showWater, setShowWater] = useState(false);
+  const [showWetland, setShowWetland] = useState(false);
+  const [showBarren, setShowBarren] = useState(false);
+  const [showTundra, setShowTundra] = useState(false);
+  const [showSnow, setShowSnow] = useState(false);
 
   // Collapsible groups
   const [showEnvironmentalGroup, setShowEnvironmentalGroup] = useState(false);
@@ -61,7 +71,7 @@ export default function CombinedEverythingMap() {
   const [LULCGeojson, setLULCGeojson] = useState<FeatureCollection<LULCFeature> | null>(null);
   const[stateParksGeojson, setStateParksGeojson] = useState<FeatureCollection<StateParksFeature> | null>(null);
 
-  // Ensure we don't attempt to update after unmount
+  // Fetch data (unchanged from your original)
   useEffect(() => {
     let cancelled = false;
 
@@ -79,7 +89,7 @@ export default function CombinedEverythingMap() {
           fetch('/datasets/Threatened-Endangered_Plants.geojson'),
           fetch('/datasets/Areas_of_Critical_Habitat_(Consolidated).geojson'),
           fetch('/datasets/2020_Urban_Areas.geojson'),
-          fetch('/datasets/roads_simplified.json'), // you requested this one
+          fetch('/datasets/roads_simplified.json'),
           fetch('/datasets/Hotels.geojson'),
           fetch('/datasets/Land_Use_Land_Cover_(LULC).geojson'),
           fetch('/datasets/State_Parks.geojson')
@@ -145,53 +155,52 @@ export default function CombinedEverythingMap() {
           `Perimeter: ${p.st_perimetershape?.toLocaleString() ?? 'N/A'}`;
         });
 
-        // Urban: palette by GEOID
-        const urbanPalette = [
-          'rgba(31,119,180,0.45)',
-          'rgba(255,127,14,0.45)',
-          'rgba(44,160,44,0.45)',
-          'rgba(214,39,40,0.45)',
-          'rgba(148,103,189,0.45)',
-          'rgba(140,86,75,0.45)',
-          'rgba(227,119,194,0.45)',
-          'rgba(127,127,127,0.45)',
-          'rgba(188,189,34,0.45)',
-          'rgba(23,190,207,0.45)',
-        ];
-        const geoidToColor: Record<string, string> = {};
-        let paletteIndex = 0;
-        (urban as FeatureCollection<UrbanFeature>).features.forEach(f => {
-          const id = f.properties.GEOID20 ?? f.properties.geoid20 ?? `gid-${paletteIndex}`;
-          if (!geoidToColor[id]) {
-            geoidToColor[id] = urbanPalette[paletteIndex % urbanPalette.length];
-            paletteIndex += 1;
-          }
-        });
+        // Urban: color by population density
+        const urbanDensityColors: Record<string, string> = {
+          'Very High': 'rgba(103,0,13,0.65)',      // > 10000
+          'High': 'rgba(165,15,21,0.6)',           // 5000-10000
+          'Medium-High': 'rgba(203,24,29,0.55)',   // 2500-5000
+          'Medium': 'rgba(239,59,44,0.5)',         // 1000-2500
+          'Medium-Low': 'rgba(251,106,74,0.45)',   // 500-1000
+          'Low': 'rgba(252,146,114,0.4)',          // < 500
+          'Unknown': 'rgba(150,150,150,0.4)',      // no data
+        };
 
-        // Add hover text + fillColor for urban
+        const getDensityCategory = (density: number | undefined | null): string => {
+          if (density == null) return 'Unknown';
+          if (density > 10000) return 'Very High';
+          if (density > 5000) return 'High';
+          if (density > 2500) return 'Medium-High';
+          if (density > 1000) return 'Medium';
+          if (density > 500) return 'Medium-Low';
+          return 'Low';
+        };
+
         (urban as FeatureCollection<UrbanFeature>).features.forEach(f => {
-          const p = f.properties as GenericProps & { hoverText?: string; fillColor?: string };
+          const p = f.properties as GenericProps & { hoverText?: string; fillColor?: string; densityCategory?: string };
           const name = p.NAMELSAD20 ?? p.namelsad20 ?? p.NAME20 ?? p.name20 ?? 'Urban Area';
           const geoid = p.GEOID20 ?? p.geoid20 ?? 'N/A';
           const pop = p.POP ?? p.pop;
           const dens = p.POPDEN ?? p.popden;
+          const densityCategory = getDensityCategory(dens);
+          p.densityCategory = densityCategory;
+          p.fillColor = urbanDensityColors[densityCategory];
           p.hoverText =
             `Urban Area: ${name}` +
             `<br>GEOID20: ${geoid}` +
             (pop != null ? `<br>Population: ${Number(pop).toLocaleString()}` : '') +
-            (dens != null ? `<br>Density: ${dens} people/sq mi` : '');
-          const id = p.GEOID20 ?? p.geoid20 ?? `gid-${paletteIndex}`;
-          p.fillColor = geoidToColor[id] ?? urbanPalette[0];
+            (dens != null ? `<br>Density: ${Number(dens).toFixed(1)} people/sq mi` : '') +
+            `<br>Density Category: ${densityCategory}`;
         });
 
-        // Hotels: add hover text
+        // Hotels
         (hotels as FeatureCollection<HotelFeature>).features.forEach(f => {
           const p = f.properties as GenericProps & { hoverText?: string };
           const name = p.hotel_name ?? p.name ?? p.NAME ?? 'Hotel';
           p.hoverText = `Hotel: ${name}`;
         });
 
-        // LULC: add labels and colors
+        // LULC
         const lulcLabels: Record<string, string> = {
           '11': 'Residential',
           '12': 'Commercial and Services',
@@ -233,41 +242,41 @@ export default function CombinedEverythingMap() {
         };
 
         const lulcColors: Record<string, string> = {
-          // Urban or Built-up land (reds/pinks/purples)
-          '11': '#e31a1c',
-          '12': '#fb9a99',
-          '13': '#984ea3',
-          '14': '#a6cee3',
-          '15': '#b15928',
-          '16': '#cab2d6',
-          '17': '#ffff99',
-          
-          // Agricultural Land (oranges/yellows/greens)
+          // Urban or Built-up land (reds/pinks)
+          '11': '#99000d',
+          '12': '#cb181d',
+          '13': '#ef3b2c',
+          '14': '#ff85a1',
+          '15': '#ff5c8a',
+          '16': '#ffa69e',
+          '17': '#ffccd5',
+
+          // Agricultural Land (oranges)
           '21': '#fdbf6f',
           '22': '#ff7f00',
-          '23': '#b2df8a',
-          '24': '#33a02c',
-          
-          // Rangeland (light yellows/beiges)
+          '23': '#e36414',
+          '24': '#D58936',
+
+          // Rangeland (light yellows)
           '31': '#ffffb3',
-          '32': '#bebada',
-          '33': '#fccde5',
-          
+          '32': '#fcefb4',
+          '33': '#eefc57',
+
           // Forest Land (dark greens)
           '41': '#238b45',
           '42': '#006d2c',
           '43': '#74c476',
-          
+
           // Water (blues)
           '51': '#08519c',
           '52': '#3182bd',
           '53': '#6baed6',
           '54': '#9ecae1',
-          
+
           // Wetland (teals)
-          '61': '#2ca25f',
-          '62': '#99d8c9',
-          
+          '61': '#49dcb1',
+          '62': '#72efdd',
+
           // Barren Land (grays/browns)
           '71': '#f0f0f0',
           '72': '#fdd0a2',
@@ -276,14 +285,14 @@ export default function CombinedEverythingMap() {
           '75': '#737373',
           '76': '#525252',
           '77': '#252525',
-          
+
           // Tundra (purples)
           '81': '#efedf5',
           '82': '#dadaeb',
           '83': '#bcbddc',
           '84': '#9e9ac8',
           '85': '#807dba',
-          
+
           // Perennial Snow (whites)
           '91': '#ffffff',
           '92': '#f7fbff'
@@ -297,10 +306,10 @@ export default function CombinedEverythingMap() {
           p.hoverText = `Land Cover Code: ${landcover}<br>${label}<br>Area: ${p.st_areashape?.toLocaleString() ?? 'N/A'} sq units`;
         });
 
-        // State Parks: add hover text and color
+        // State Parks
         (stateParks as FeatureCollection<StateParksFeature>).features.forEach(f => {
           const p = f.properties as GenericProps & { fillColor?: string; hoverText?: string };
-          p.fillColor = '#778da9'; // Green color for parks
+          p.fillColor = '#778da9'; // green color
           p.hoverText = `Park: ${p.name ?? 'N/A'}<br>Type: ${p.type_defin ?? 'N/A'}<br>Island: ${p.island ?? 'N/A'}<br>Acres: ${p.gis_acre?.toLocaleString() ?? 'N/A'}`;
         });
 
@@ -328,8 +337,23 @@ export default function CombinedEverythingMap() {
   useEffect(() => {
     if (!divRef.current) return;
 
+    // Helper function to get category from landcover code
+    const getLULCCategory = (code: string): string => {
+      const codeNum = parseInt(code);
+      if (codeNum >= 11 && codeNum <= 17) return 'urban';
+      if (codeNum >= 21 && codeNum <= 24) return 'agricultural';
+      if (codeNum >= 31 && codeNum <= 33) return 'rangeland';
+      if (codeNum >= 41 && codeNum <= 43) return 'forest';
+      if (codeNum >= 51 && codeNum <= 54) return 'water';
+      if (codeNum >= 61 && codeNum <= 62) return 'wetland';
+      if (codeNum >= 71 && codeNum <= 77) return 'barren';
+      if (codeNum >= 81 && codeNum <= 85) return 'tundra';
+      if (codeNum >= 91 && codeNum <= 92) return 'snow';
+      return 'unknown';
+    };
+
     // Build combined features depending on toggles (used for center & combined outline)
-    const selectedFeatures: (PlantFeature | HabitatFeature | UrbanFeature | RoadFeature | HotelFeature)[] = [];
+    const selectedFeatures: (PlantFeature | HabitatFeature | UrbanFeature | RoadFeature | HotelFeature | LULCFeature | StateParksFeature)[] = [];
 
     if (showPlants && plantsGeojson) selectedFeatures.push(...plantsGeojson.features);
     if (showHabitat && habitatGeojson) selectedFeatures.push(...habitatGeojson.features);
@@ -337,10 +361,28 @@ export default function CombinedEverythingMap() {
     if (showRoads && roadsGeojson) selectedFeatures.push(...roadsGeojson.features as any);
     // hotels are point features - include them for centering if toggled
     if (showHotels && hotelsGeojson) selectedFeatures.push(...hotelsGeojson.features as any);
-    if (showLULC && LULCGeojson) selectedFeatures.push(...LULCGeojson.features);
     if (showStateParks && stateParksGeojson) selectedFeatures.push(...stateParksGeojson.features);
 
-    // Compute map center: default to Hawaii if nothing selected
+    // Add filtered LULC features
+    if (LULCGeojson) {
+      const filteredLULC = LULCGeojson.features.filter(f => {
+        const code = String(f.properties.landcover ?? '');
+        const category = getLULCCategory(code);
+        
+        return (category === 'urban' && showUrbanBuiltup) ||
+               (category === 'agricultural' && showAgricultural) ||
+               (category === 'rangeland' && showRangeland) ||
+               (category === 'forest' && showForest) ||
+               (category === 'water' && showWater) ||
+               (category === 'wetland' && showWetland) ||
+               (category === 'barren' && showBarren) ||
+               (category === 'tundra' && showTundra) ||
+               (category === 'snow' && showSnow);
+      });
+      selectedFeatures.push(...filteredLULC);
+    }
+
+    // Compute map center
     let centerLat = 20.7;
     let centerLon = -156.0;
 
@@ -406,7 +448,7 @@ export default function CombinedEverythingMap() {
       );
     }
 
-    // Roads layer (from roads_simplified.json)
+    // Roads layers
     if (showRoads && roadsGeojson) {
       mapboxLayers.push({
         sourcetype: 'geojson' as const,
@@ -417,10 +459,25 @@ export default function CombinedEverythingMap() {
       });
     }
 
-    // LULC fills
-    if (showLULC && LULCGeojson) {
+    // LULC fills - filtered by category
+    if (LULCGeojson) {
+      const filteredLULC = LULCGeojson.features.filter(f => {
+        const code = String(f.properties.landcover ?? '');
+        const category = getLULCCategory(code);
+        
+        return (category === 'urban' && showUrbanBuiltup) ||
+               (category === 'agricultural' && showAgricultural) ||
+               (category === 'rangeland' && showRangeland) ||
+               (category === 'forest' && showForest) ||
+               (category === 'water' && showWater) ||
+               (category === 'wetland' && showWetland) ||
+               (category === 'barren' && showBarren) ||
+               (category === 'tundra' && showTundra) ||
+               (category === 'snow' && showSnow);
+      });
+
       mapboxLayers.push(
-        ...LULCGeojson.features.map(f => ({
+        ...filteredLULC.map(f => ({
           sourcetype: 'geojson' as const,
           source: { type: 'FeatureCollection', features: [f] },
           type: 'fill' as const,
@@ -445,13 +502,30 @@ export default function CombinedEverythingMap() {
       );
     }
 
-    // Outline for selected polygonal datasets (plants/habitat/urban)
+    // Outlines
     const combinedOutlineFeatures: any[] = [];
     if (showPlants && plantsGeojson) combinedOutlineFeatures.push(...plantsGeojson.features);
     if (showHabitat && habitatGeojson) combinedOutlineFeatures.push(...habitatGeojson.features);
     if (showUrban && urbanGeojson) combinedOutlineFeatures.push(...urbanGeojson.features);
-    if (showLULC && LULCGeojson) combinedOutlineFeatures.push(...LULCGeojson.features);
     if (showStateParks && stateParksGeojson) combinedOutlineFeatures.push(...stateParksGeojson.features);
+    
+    if (LULCGeojson) {
+      const filteredLULC = LULCGeojson.features.filter(f => {
+        const code = String(f.properties.landcover ?? '');
+        const category = getLULCCategory(code);
+        
+        return (category === 'urban' && showUrbanBuiltup) ||
+               (category === 'agricultural' && showAgricultural) ||
+               (category === 'rangeland' && showRangeland) ||
+               (category === 'forest' && showForest) ||
+               (category === 'water' && showWater) ||
+               (category === 'wetland' && showWetland) ||
+               (category === 'barren' && showBarren) ||
+               (category === 'tundra' && showTundra) ||
+               (category === 'snow' && showSnow);
+      });
+      combinedOutlineFeatures.push(...filteredLULC);
+    }
 
     if (combinedOutlineFeatures.length > 0) {
       mapboxLayers.push({
@@ -560,14 +634,33 @@ export default function CombinedEverythingMap() {
       });
     }
 
-    // LULC and State Parks hover
-    if ((showLULC && LULCGeojson) || (showStateParks && stateParksGeojson)) {
+    // LULC
+    const showAnyLULC = showUrbanBuiltup || showAgricultural || showRangeland || 
+                        showForest || showWater || showWetland || showBarren || 
+                        showTundra || showSnow;
+
+    if ((showAnyLULC && LULCGeojson) || (showStateParks && stateParksGeojson)) {
       const centLat: number[] = [];
       const centLon: number[] = [];
       const centText: string[] = [];
 
-      if (showLULC && LULCGeojson) {
-        LULCGeojson.features.forEach(f => {
+      if (showAnyLULC && LULCGeojson) {
+        const filteredLULC = LULCGeojson.features.filter(f => {
+          const code = String(f.properties.landcover ?? '');
+          const category = getLULCCategory(code);
+          
+          return (category === 'urban' && showUrbanBuiltup) ||
+                 (category === 'agricultural' && showAgricultural) ||
+                 (category === 'rangeland' && showRangeland) ||
+                 (category === 'forest' && showForest) ||
+                 (category === 'water' && showWater) ||
+                 (category === 'wetland' && showWetland) ||
+                 (category === 'barren' && showBarren) ||
+                 (category === 'tundra' && showTundra) ||
+                 (category === 'snow' && showSnow);
+        });
+
+        filteredLULC.forEach(f => {
           const coords = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
           centLat.push(coords.reduce((s, c) => s + c[1], 0) / coords.length);
           centLon.push(coords.reduce((s, c) => s + c[0], 0) / coords.length);
@@ -575,6 +668,7 @@ export default function CombinedEverythingMap() {
         });
       }
 
+      // State Parks
       if (showStateParks && stateParksGeojson) {
         stateParksGeojson.features.forEach(f => {
           const coords = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
@@ -595,7 +689,6 @@ export default function CombinedEverythingMap() {
       });
     }
 
-    // Layout: ensure mapbox.layers is explicitly set to the computed layers (possibly empty)
     const layout: Partial<Plotly.Layout> = {
       autosize: true,
       mapbox: {
@@ -609,12 +702,10 @@ export default function CombinedEverythingMap() {
       showlegend: false
     };
 
-    // Use Plotly.react to update traces + layout cleanly (avoids leftover layers)
     try {
       if ((Plotly as any).react) {
         (Plotly as any).react(divRef.current, traces, layout, { displayModeBar: true, responsive: true });
       } else {
-        // Fallback to newPlot if react is unavailable
         try { (Plotly as any).purge(divRef.current); } catch {}
         Plotly.newPlot(divRef.current, traces, layout, { displayModeBar: true, responsive: true });
       }
@@ -628,7 +719,15 @@ export default function CombinedEverythingMap() {
     showUrban,
     showRoads,
     showHotels,
-    showLULC,
+    showUrbanBuiltup,
+    showAgricultural,
+    showRangeland,
+    showForest,
+    showWater,
+    showWetland,
+    showBarren,
+    showTundra,
+    showSnow,
     showStateParks,
     plantsGeojson,
     habitatGeojson,
@@ -639,7 +738,6 @@ export default function CombinedEverythingMap() {
     stateParksGeojson,
   ]);
 
-  // Zoom to specific islands
   const zoomToIsland = (island: string) => {
     const centers: Record<string, { lat: number; lon: number; zoom: number }> = {
       'Oahu': { lat: 21.4389, lon: -158.0001, zoom: 9.5 },
@@ -663,95 +761,199 @@ export default function CombinedEverythingMap() {
     }
   };
 
-  // LULC custom color legend
-  const LULCLegend = () => {
-    if (!showLULC) return null;
-  
-    const legendGroups = [
-      {
-        category: 'Urban or Built-up Land',
+  const DynamicLegend = () => {
+    const legendSections: Array<{title: string; items: Array<{label: string; color: string}>}> = [];
+
+    // Endangered Plants
+    if (showPlants) {
+      legendSections.push({
+        title: 'Endangered Plants (Density)',
         items: [
-          { code: '11', label: 'Residential', color: '#e31a1c' },
-          { code: '12', label: 'Commercial & Services', color: '#fb9a99' },
-          { code: '13', label: 'Industrial', color: '#984ea3' },
-          { code: '14', label: 'Transportation & Utilities', color: '#a6cee3' },
-          { code: '15', label: 'Industrial & Commercial Complexes', color: '#b15928' },
-          { code: '16', label: 'Mixed Urban or Built-up', color: '#cab2d6' },
-          { code: '17', label: 'Other Urban or Built-up', color: '#ffff99' },
+          { label: 'Very High', color: '#344e41' },
+          { label: 'High', color: '#3a5a40' },
+          { label: 'Medium', color: '#588157' },
+          { label: 'Low', color: '#a3b18a' },
+          { label: 'Other/Low Outside', color: '#8dcc94ff' },
+          { label: 'Outlier', color: '#dad7cd' },
         ]
-      },
-      {
-        category: 'Agricultural Land',
+      });
+    }
+
+    // Critical Habitats
+    if (showHabitat) {
+      legendSections.push({
+        title: 'Critical Habitats',
         items: [
-          { code: '21', label: 'Cropland & Pasture', color: '#fdbf6f' },
-          { code: '22', label: 'Orchards & Vineyards', color: '#ff7f00' },
-          { code: '23', label: 'Confined Feeding Operations', color: '#b2df8a' },
-          { code: '24', label: 'Other Agricultural', color: '#33a02c' },
+          { label: 'Protected Areas', color: '#e9c46a' },
         ]
-      },
-      {
-        category: 'Rangeland',
+      });
+    }
+
+    // State Parks
+    if (showStateParks) {
+      legendSections.push({
+        title: 'State Parks',
         items: [
-          { code: '31', label: 'Herbaceous Rangeland', color: '#ffffb3' },
-          { code: '32', label: 'Shrub & Brush Rangeland', color: '#bebada' },
-          { code: '33', label: 'Mixed Rangeland', color: '#fccde5' },
+          { label: 'State Park Land', color: '#778da9' },
         ]
-      },
-      {
-        category: 'Forest Land',
+      });
+    }
+
+    // Forest Land
+    if (showForest) {
+      legendSections.push({
+        title: 'Forest Land',
         items: [
-          { code: '41', label: 'Deciduous Forest', color: '#238b45' },
-          { code: '42', label: 'Evergreen Forest', color: '#006d2c' },
-          { code: '43', label: 'Mixed Forest', color: '#74c476' },
+          { label: 'Deciduous Forest', color: '#238b45' },
+          { label: 'Evergreen Forest', color: '#006d2c' },
+          { label: 'Mixed Forest', color: '#74c476' },
         ]
-      },
-      {
-        category: 'Water',
+      });
+    }
+
+    // Rangeland
+    if (showRangeland) {
+      legendSections.push({
+        title: 'Rangeland',
         items: [
-          { code: '51', label: 'Streams & Canals', color: '#08519c' },
-          { code: '52', label: 'Lakes', color: '#3182bd' },
-          { code: '53', label: 'Reservoirs', color: '#6baed6' },
-          { code: '54', label: 'Bays & Estuaries', color: '#9ecae1' },
+          { label: 'Herbaceous Rangeland', color: '#ffffb3' },
+          { label: 'Shrub & Brush Rangeland', color: '#fcefb4' },
+          { label: 'Mixed Rangeland', color: '#eefc57' },
         ]
-      },
-      {
-        category: 'Wetland',
+      });
+    }
+
+    // Water
+    if (showWater) {
+      legendSections.push({
+        title: 'Water',
         items: [
-          { code: '61', label: 'Forested Wetland', color: '#2ca25f' },
-          { code: '62', label: 'Nonforested Wetland', color: '#99d8c9' },
+          { label: 'Streams & Canals', color: '#08519c' },
+          { label: 'Lakes', color: '#3182bd' },
+          { label: 'Reservoirs', color: '#6baed6' },
+          { label: 'Bays & Estuaries', color: '#9ecae1' },
         ]
-      },
-      {
-        category: 'Barren Land',
+      });
+    }
+
+    // Wetland
+    if (showWetland) {
+      legendSections.push({
+        title: 'Wetland',
         items: [
-          { code: '71', label: 'Dry Salt Flats', color: '#f0f0f0' },
-          { code: '72', label: 'Beaches', color: '#fdd0a2' },
-          { code: '73', label: 'Sandy Areas', color: '#bdbdbd' },
-          { code: '74', label: 'Bare Exposed Rock', color: '#969696' },
-          { code: '75', label: 'Strip Mines & Quarries', color: '#737373' },
-          { code: '76', label: 'Transitional Areas', color: '#525252' },
-          { code: '77', label: 'Mixed Barren', color: '#252525' },
+          { label: 'Forested Wetland', color: '#49dcb1' },
+          { label: 'Nonforested Wetland', color: '#72efdd' },
         ]
-      },
-      {
-        category: 'Tundra',
+      });
+    }
+
+    // Barren Land
+    if (showBarren) {
+      legendSections.push({
+        title: 'Barren Land',
         items: [
-          { code: '81', label: 'Shrub & Brush Tundra', color: '#efedf5' },
-          { code: '82', label: 'Herbaceous Tundra', color: '#dadaeb' },
-          { code: '83', label: 'Bare Ground', color: '#bcbddc' },
-          { code: '84', label: 'Wet Tundra', color: '#9e9ac8' },
-          { code: '85', label: 'Mixed Tundra', color: '#807dba' },
+          { label: 'Dry Salt Flats', color: '#f0f0f0' },
+          { label: 'Beaches', color: '#fdd0a2' },
+          { label: 'Sandy Areas', color: '#bdbdbd' },
+          { label: 'Bare Exposed Rock', color: '#969696' },
+          { label: 'Strip Mines & Quarries', color: '#737373' },
+          { label: 'Transitional Areas', color: '#525252' },
+          { label: 'Mixed Barren', color: '#252525' },
         ]
-      },
-      {
-        category: 'Perennial Snow',
+      });
+    }
+
+    // Tundra
+    if (showTundra) {
+      legendSections.push({
+        title: 'Tundra',
         items: [
-          { code: '91', label: 'Perennial Snowfields or Ice', color: '#ffffff' },
-          { code: '92', label: 'Glaciers', color: '#f7fbff' },
+          { label: 'Shrub & Brush Tundra', color: '#efedf5' },
+          { label: 'Herbaceous Tundra', color: '#dadaeb' },
+          { label: 'Bare Ground', color: '#bcbddc' },
+          { label: 'Wet Tundra', color: '#9e9ac8' },
+          { label: 'Mixed Tundra', color: '#807dba' },
         ]
-      },
-    ];
-  
+      });
+    }
+
+    // Perennial Snow
+    if (showSnow) {
+      legendSections.push({
+        title: 'Perennial Snow',
+        items: [
+          { label: 'Perennial Snowfields/Ice', color: '#ffffff' },
+          { label: 'Glaciers', color: '#f7fbff' },
+        ]
+      });
+    }
+
+    // Urban Areas - by Density
+    if (showUrban) {
+      legendSections.push({
+        title: 'Urban Areas (Population Density)',
+        items: [
+          { label: 'Very High (>10,000/sq mi)', color: 'rgba(103,0,13,0.65)' },
+          { label: 'High (5,000-10,000/sq mi)', color: 'rgba(165,15,21,0.6)' },
+          { label: 'Medium-High (2,500-5,000/sq mi)', color: 'rgba(203,24,29,0.55)' },
+          { label: 'Medium (1,000-2,500/sq mi)', color: 'rgba(239,59,44,0.5)' },
+          { label: 'Medium-Low (500-1,000/sq mi)', color: 'rgba(251,106,74,0.45)' },
+          { label: 'Low (<500/sq mi)', color: 'rgba(252,146,114,0.4)' },
+        ]
+      });
+    }
+
+    // Roads
+    if (showRoads) {
+      legendSections.push({
+        title: 'Roads',
+        items: [
+          { label: 'Road Network', color: '#000000' },
+        ]
+      });
+    }
+
+    // Hotels
+    if (showHotels) {
+      legendSections.push({
+        title: 'Hotels',
+        items: [
+          { label: 'Hotel Locations', color: 'red' },
+        ]
+      });
+    }
+
+    // Urban/Built-up Land
+    if (showUrbanBuiltup) {
+      legendSections.push({
+        title: 'Urban/Built-up Land',
+        items: [
+          { label: 'Residential', color: '#99000d' },
+          { label: 'Commercial & Services', color: '#cb181d' },
+          { label: 'Industrial', color: '#ef3b2c' },
+          { label: 'Transportation & Utilities', color: '#ff85a1' },
+          { label: 'Industrial & Commercial Complexes', color: '#ff5c8a' },
+          { label: 'Mixed Urban/Built-up', color: '#ffa69e' },
+          { label: 'Other Urban/Built-up', color: '#ffccd5' },
+        ]
+      });
+    }
+
+    // Agricultural Land
+    if (showAgricultural) {
+      legendSections.push({
+        title: 'Agricultural Land',
+        items: [
+          { label: 'Cropland & Pasture', color: '#fdbf6f' },
+          { label: 'Orchards & Vineyards', color: '#ff7f00' },
+          { label: 'Confined Feeding Operations', color: '#e36414' },
+          { label: 'Other Agricultural', color: '#D58936' },
+        ]
+      });
+    }
+
+    if (legendSections.length === 0) return null;
+
     return (
       <div
         style={{
@@ -771,16 +973,16 @@ export default function CombinedEverythingMap() {
         }}
       >
         <div style={{ fontWeight: 600, marginBottom: 10, fontSize: 14, borderBottom: '2px solid #333', paddingBottom: 6 }}>
-          Land Use/Cover Legend
+          Active Layers
         </div>
-        {legendGroups.map((group, idx) => (
+        {legendSections.map((section, idx) => (
           <div key={idx} style={{ marginBottom: 12 }}>
             <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 4, color: '#555' }}>
-              {group.category}
+              {section.title}
             </div>
-            {group.items.map(item => (
+            {section.items.map((item, itemIdx) => (
               <div
-                key={item.code}
+                key={itemIdx}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -800,7 +1002,7 @@ export default function CombinedEverythingMap() {
                   }}
                 />
                 <span style={{ fontSize: 10 }}>
-                  <span style={{ fontWeight: 500 }}>{item.code}</span> - {item.label}
+                  {item.label}
                 </span>
               </div>
             ))}
@@ -810,10 +1012,8 @@ export default function CombinedEverythingMap() {
     );
   };
 
-  // ---------- UI + Map ----------
   return (
     <>
-      {/* Controls */}
       <div
         style={{
           position: 'fixed',
@@ -853,6 +1053,34 @@ export default function CombinedEverythingMap() {
                 <input type="checkbox" checked={showStateParks} onChange={e => setShowStateParks(e.target.checked)} />
                 <span>State Parks</span>
               </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                <input type="checkbox" checked={showForest} onChange={e => setShowForest(e.target.checked)} />
+                <span>Forest Land</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                <input type="checkbox" checked={showRangeland} onChange={e => setShowRangeland(e.target.checked)} />
+                <span>Rangeland</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                <input type="checkbox" checked={showWater} onChange={e => setShowWater(e.target.checked)} />
+                <span>Water</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                <input type="checkbox" checked={showWetland} onChange={e => setShowWetland(e.target.checked)} />
+                <span>Wetland</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                <input type="checkbox" checked={showBarren} onChange={e => setShowBarren(e.target.checked)} />
+                <span>Barren Land</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                <input type="checkbox" checked={showTundra} onChange={e => setShowTundra(e.target.checked)} />
+                <span>Tundra</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                <input type="checkbox" checked={showSnow} onChange={e => setShowSnow(e.target.checked)} />
+                <span>Perennial Snow</span>
+              </label>
             </div>
           )}
         </div>
@@ -882,21 +1110,25 @@ export default function CombinedEverythingMap() {
                 <span>Hotels</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-                <input type="checkbox" checked={showLULC} onChange={e => setShowLULC(e.target.checked)} />
-                <span>Land Use/Cover</span>
+                <input type="checkbox" checked={showUrbanBuiltup} onChange={e => setShowUrbanBuiltup(e.target.checked)} />
+                <span>Built-up Land</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                <input type="checkbox" checked={showAgricultural} onChange={e => setShowAgricultural(e.target.checked)} />
+                <span>Agricultural Land</span>
               </label>
             </div>
           )}
         </div>
 
-        {/* QUICK ZOOM SECTION */}
+        {/* Quick Zoom */}
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #ddd' }}>
           <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 13 }}>
             Quick Zoom
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
-              {['Oahu', 'Maui', 'Hawaii', 'Kauai', 'Molokai', 'Lanai', 'Kahoolawe', 'Niihau', 'All'].map(island => (
-                <button
+            {['Oahu', 'Maui', 'Hawaii', 'Kauai', 'Molokai', 'Lanai', 'Kahoolawe', 'Niihau', 'All'].map(island => (
+              <button
                 key={island}
                 onClick={() => zoomToIsland(island)}
                 style={{
@@ -918,10 +1150,8 @@ export default function CombinedEverythingMap() {
         </div>
       </div>
 
-      {/* LULC Legend */}
-      <LULCLegend />
+      <DynamicLegend />
 
-      {/* Map container (full viewport) */}
       <div
         ref={divRef}
         style={{
