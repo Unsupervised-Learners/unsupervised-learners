@@ -649,14 +649,10 @@ export default function CombinedEverythingMap() {
 
   const center = centers[island];
   if (center && divRef.current) {
-    const update: any = {
-      'mapbox.center.lat': center.lat,
-      'mapbox.center.lon': center.lon,
+    (Plotly as any).relayout(divRef.current, {
+      'mapbox.center': { lat: center.lat, lon: center.lon },
       'mapbox.zoom': center.zoom,
-    };
-
-    Plotly.relayout(divRef.current, update);
-    // or: (Plotly as any).relayout(divRef.current, update);
+    } as any);
   }
 };
 
