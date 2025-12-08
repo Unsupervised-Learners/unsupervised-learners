@@ -414,6 +414,7 @@ export default function CombinedEverythingMap() {
         type: 'line' as const,
         color: '#000000',
         line: { width: 1 },
+        opacity: 0.4
       });
     }
 
@@ -641,27 +642,26 @@ export default function CombinedEverythingMap() {
 
   // Zoom to specific islands
   const zoomToIsland = (island: string) => {
-    const centers: Record<string, { lat: number; lon: number; zoom: number }> = {
-      'Oahu': { lat: 21.4389, lon: -158.0001, zoom: 9.5 },
-      'Maui': { lat: 20.7984, lon: -156.3319, zoom: 9.5 },
-      'Hawaii': { lat: 19.5429, lon: -155.6659, zoom: 8.5 },
-      'Kauai': { lat: 22.0964, lon: -159.5261, zoom: 9.5 },
-      'Molokai': { lat: 21.1444, lon: -157.0226, zoom: 10 },
-      'Lanai': { lat: 20.8283, lon: -156.9197, zoom: 10.5 },
-      'Kahoolawe': { lat: 20.5497, lon: -156.6034, zoom: 11 },
-      'Niihau': { lat: 21.9024, lon: -160.1669, zoom: 10.5 },
-      'All': { lat: 20.7, lon: -157.0, zoom: 7 },
-    };
-  
-    const center = centers[island];
-    if (center && divRef.current) {
-      Plotly.relayout(divRef.current, {
-        'mapbox.center.lat': center.lat,
-        'mapbox.center.lon': center.lon,
-        'mapbox.zoom': center.zoom,
-      });
-    }
+  const centers: Record<string, { lat: number; lon: number; zoom: number }> = {
+    Oahu:      { lat: 21.4389, lon: -158.0001, zoom: 9.5 },
+    Maui:      { lat: 20.7984, lon: -156.3319, zoom: 9.5 },
+    Hawaii:    { lat: 19.5429, lon: -155.6659, zoom: 8.5 },
+    Kauai:     { lat: 22.0964, lon: -159.5261, zoom: 9.5 },
+    Molokai:   { lat: 21.1444, lon: -157.0226, zoom: 10 },
+    Lanai:     { lat: 20.8283, lon: -156.9197, zoom: 10.5 },
+    Kahoolawe: { lat: 20.5497, lon: -156.6034, zoom: 11 },
+    Niihau:    { lat: 21.9024, lon: -160.1669, zoom: 10.5 },
+    All:       { lat: 20.7,    lon: -157.0,   zoom: 7 },
   };
+
+  const center = centers[island];
+  if (center && divRef.current) {
+    (Plotly as any).relayout(divRef.current, {
+      'mapbox.center': { lat: center.lat, lon: center.lon },
+      'mapbox.zoom': center.zoom,
+    } as any);
+  }
+};
 
   // LULC custom color legend
   const LULCLegend = () => {
