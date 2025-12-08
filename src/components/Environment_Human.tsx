@@ -55,8 +55,6 @@ export default function CombinedEverythingMap() {
   const [showWater, setShowWater] = useState(false);
   const [showWetland, setShowWetland] = useState(false);
   const [showBarren, setShowBarren] = useState(false);
-  const [showTundra, setShowTundra] = useState(false);
-  const [showSnow, setShowSnow] = useState(false);
 
   // Collapsible groups
   const [showEnvironmentalGroup, setShowEnvironmentalGroup] = useState(false);
@@ -231,14 +229,7 @@ export default function CombinedEverythingMap() {
           '74': 'Bare Exposed Rock',
           '75': 'Strip Mines, Quarries, and Gravel Pits',
           '76': 'Transitional Areas',
-          '77': 'Mixed Barren Land',
-          '81': 'Shrub and Brush Tundra',
-          '82': 'Herbaceous Tundra',
-          '83': 'Bare Ground',
-          '84': 'Wet Tundra',
-          '85': 'Mixed Tundra',
-          '91': 'Perennial Snowfields or Ice',
-          '92': 'Glaciers'
+          '77': 'Mixed Barren Land'
         };
 
         const lulcColors: Record<string, string> = {
@@ -284,18 +275,7 @@ export default function CombinedEverythingMap() {
           '74': '#969696',
           '75': '#737373',
           '76': '#525252',
-          '77': '#252525',
-
-          // Tundra (purples)
-          '81': '#efedf5',
-          '82': '#dadaeb',
-          '83': '#bcbddc',
-          '84': '#9e9ac8',
-          '85': '#807dba',
-
-          // Perennial Snow (whites)
-          '91': '#ffffff',
-          '92': '#f7fbff'
+          '77': '#252525'
         };
 
         (LULC as FeatureCollection<LULCFeature>).features.forEach(f => {
@@ -347,8 +327,6 @@ export default function CombinedEverythingMap() {
       if (codeNum >= 51 && codeNum <= 54) return 'water';
       if (codeNum >= 61 && codeNum <= 62) return 'wetland';
       if (codeNum >= 71 && codeNum <= 77) return 'barren';
-      if (codeNum >= 81 && codeNum <= 85) return 'tundra';
-      if (codeNum >= 91 && codeNum <= 92) return 'snow';
       return 'unknown';
     };
 
@@ -375,9 +353,7 @@ export default function CombinedEverythingMap() {
                (category === 'forest' && showForest) ||
                (category === 'water' && showWater) ||
                (category === 'wetland' && showWetland) ||
-               (category === 'barren' && showBarren) ||
-               (category === 'tundra' && showTundra) ||
-               (category === 'snow' && showSnow);
+               (category === 'barren' && showBarren)
       });
       selectedFeatures.push(...filteredLULC);
     }
@@ -473,9 +449,7 @@ export default function CombinedEverythingMap() {
                (category === 'forest' && showForest) ||
                (category === 'water' && showWater) ||
                (category === 'wetland' && showWetland) ||
-               (category === 'barren' && showBarren) ||
-               (category === 'tundra' && showTundra) ||
-               (category === 'snow' && showSnow);
+               (category === 'barren' && showBarren)
       });
 
       mapboxLayers.push(
@@ -522,9 +496,7 @@ export default function CombinedEverythingMap() {
                (category === 'forest' && showForest) ||
                (category === 'water' && showWater) ||
                (category === 'wetland' && showWetland) ||
-               (category === 'barren' && showBarren) ||
-               (category === 'tundra' && showTundra) ||
-               (category === 'snow' && showSnow);
+               (category === 'barren' && showBarren)
       });
       combinedOutlineFeatures.push(...filteredLULC);
     }
@@ -638,8 +610,7 @@ export default function CombinedEverythingMap() {
 
     // LULC
     const showAnyLULC = showUrbanBuiltup || showAgricultural || showRangeland || 
-                        showForest || showWater || showWetland || showBarren || 
-                        showTundra || showSnow;
+                        showForest || showWater || showWetland || showBarren;
 
     if ((showAnyLULC && LULCGeojson) || (showStateParks && stateParksGeojson)) {
       const centLat: number[] = [];
@@ -657,9 +628,7 @@ export default function CombinedEverythingMap() {
                  (category === 'forest' && showForest) ||
                  (category === 'water' && showWater) ||
                  (category === 'wetland' && showWetland) ||
-                 (category === 'barren' && showBarren) ||
-                 (category === 'tundra' && showTundra) ||
-                 (category === 'snow' && showSnow);
+                 (category === 'barren' && showBarren)
         });
 
         filteredLULC.forEach(f => {
@@ -728,8 +697,6 @@ export default function CombinedEverythingMap() {
     showWater,
     showWetland,
     showBarren,
-    showTundra,
-    showSnow,
     showStateParks,
     plantsGeojson,
     habitatGeojson,
@@ -861,31 +828,6 @@ export default function CombinedEverythingMap() {
           { label: 'Strip Mines & Quarries', color: '#737373' },
           { label: 'Transitional Areas', color: '#525252' },
           { label: 'Mixed Barren', color: '#252525' },
-        ]
-      });
-    }
-
-    // Tundra
-    if (showTundra) {
-      legendSections.push({
-        title: 'Tundra',
-        items: [
-          { label: 'Shrub & Brush Tundra', color: '#efedf5' },
-          { label: 'Herbaceous Tundra', color: '#dadaeb' },
-          { label: 'Bare Ground', color: '#bcbddc' },
-          { label: 'Wet Tundra', color: '#9e9ac8' },
-          { label: 'Mixed Tundra', color: '#807dba' },
-        ]
-      });
-    }
-
-    // Perennial Snow
-    if (showSnow) {
-      legendSections.push({
-        title: 'Perennial Snow',
-        items: [
-          { label: 'Perennial Snowfields/Ice', color: '#ffffff' },
-          { label: 'Glaciers', color: '#f7fbff' },
         ]
       });
     }
@@ -1074,14 +1016,6 @@ export default function CombinedEverythingMap() {
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
                 <input type="checkbox" checked={showBarren} onChange={e => setShowBarren(e.target.checked)} />
                 <span>Barren Land</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-                <input type="checkbox" checked={showTundra} onChange={e => setShowTundra(e.target.checked)} />
-                <span>Tundra</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-                <input type="checkbox" checked={showSnow} onChange={e => setShowSnow(e.target.checked)} />
-                <span>Perennial Snow</span>
               </label>
             </div>
           )}
