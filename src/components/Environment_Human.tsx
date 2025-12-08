@@ -413,7 +413,9 @@ export default function CombinedEverythingMap() {
         source: roadsGeojson,
         type: 'line' as const,
         color: '#000000',
-        line: { width: 1 },
+        line: { width: 1,
+          opacity: 0.4,
+         },
       });
     }
 
