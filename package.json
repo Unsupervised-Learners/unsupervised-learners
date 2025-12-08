@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev-https": "next dev --experimental-https",
-    "build": "next build",
+    "build": "next build --no-lint",
     "start": "next start",
     "playwright-development": "npx playwright test",
     "lint": "echo 'Skipping lint'"
@@ -15,7 +15,7 @@
     "@ngneat/falso": "^7.2.0",
     "bootstrap": "^5.3.3",
     "multiselect-react-dropdown": "^2.0.25",
-    "next": "^16.0.6",
+    "next": "^16.0.7",
     "plotly.js-dist-min": "^3.3.0",
     "react": "^18",
     "react-bootstrap": "^2.10.4",
