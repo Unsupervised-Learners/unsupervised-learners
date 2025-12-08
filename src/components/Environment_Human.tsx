@@ -659,7 +659,8 @@ export default function CombinedEverythingMap() {
         'mapbox.center.lat': center.lat,
         'mapbox.center.lon': center.lon,
         'mapbox.zoom': center.zoom,
-      });
+      } as any
+    );
     }
   };
 
