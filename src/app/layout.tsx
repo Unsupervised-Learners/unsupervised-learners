@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: 'Human & Environment Visualization',
   description: 'Final project for ICS 484',
 };
-
+ 
 export default function RootLayout({
   children,
 }: {
