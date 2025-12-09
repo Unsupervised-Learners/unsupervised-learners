@@ -612,7 +612,7 @@ export default function CombinedEverythingMap() {
         style: 'carto-positron',
         center: { lat: centerLat, lon: centerLon },
         zoom: 8.5,
-        layers: mapboxLayers,
+        layers: mapboxLayers, 
       },
       hovermode: 'closest',
       margin: { t: 0, l: 0, r: 0, b: 0 },
