@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Plotly from 'plotly.js-dist-min';
+// import Plotly from 'plotly.js-dist-min';
+
+import dynamic from 'next/dynamic';
 
 // ---------- Types ----------
 type Coordinate = [number, number];
@@ -39,6 +41,8 @@ type StateParksFeature = Feature<Polygon | MultiPolygon, GenericProps>;
 export default function CombinedEverythingMap() {
   const divRef = useRef<HTMLDivElement | null>(null);
 
+  const [Plotly, setPlotly] = useState<any>(null);
+
   // Layer visibility: all OFF by default
   const [showPlants, setShowPlants] = useState(false);
   const [showHabitat, setShowHabitat] = useState(false);
@@ -60,6 +64,12 @@ export default function CombinedEverythingMap() {
   const [hotelsGeojson, setHotelsGeojson] = useState<FeatureCollection<HotelFeature> | null>(null);
   const [LULCGeojson, setLULCGeojson] = useState<FeatureCollection<LULCFeature> | null>(null);
   const[stateParksGeojson, setStateParksGeojson] = useState<FeatureCollection<StateParksFeature> | null>(null);
+
+  useEffect(() => {
+    import('plotly.js-dist-min').then((module) => {
+      setPlotly(module.default);
+    });
+  }, []);
 
   // Ensure we don't attempt to update after unmount
   useEffect(() => {
@@ -596,7 +606,7 @@ export default function CombinedEverythingMap() {
     }
 
     // Layout: ensure mapbox.layers is explicitly set to the computed layers (possibly empty)
-    const layout: Partial<Plotly.Layout> = {
+    const layout: any = {
       autosize: true,
       mapbox: {
         style: 'carto-positron',
