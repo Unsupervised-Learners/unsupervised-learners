@@ -72,6 +72,7 @@ export default function CombinedEverythingMap() {
   const [LULCGeojson, setLULCGeojson] = useState<FeatureCollection<LULCFeature> | null>(null);
   const[stateParksGeojson, setStateParksGeojson] = useState<FeatureCollection<StateParksFeature> | null>(null);
 
+  const [initialCenter] = useState({ lat: 20.7, lon: -156.0 });
     useEffect(() => {
     import('plotly.js-dist-min').then((module) => {
       setPlotly(module.default);
