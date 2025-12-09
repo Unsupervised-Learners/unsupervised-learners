@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Plotly from 'plotly.js-dist-min';
+// import Plotly from 'plotly.js-dist-min';
+
+import dynamic from 'next/dynamic';
 
 // ---------- Types ----------
 type Coordinate = [number, number];
@@ -39,6 +41,8 @@ type StateParksFeature = Feature<Polygon | MultiPolygon, GenericProps>;
 export default function CombinedEverythingMap() {
   const divRef = useRef<HTMLDivElement | null>(null);
 
+  const [Plotly, setPlotly] = useState<any>(null);
+
   // Layer visibility: all OFF by default
   const [showPlants, setShowPlants] = useState(false);
   const [showHabitat, setShowHabitat] = useState(false);
@@ -69,6 +73,13 @@ export default function CombinedEverythingMap() {
   const [LULCGeojson, setLULCGeojson] = useState<FeatureCollection<LULCFeature> | null>(null);
   const[stateParksGeojson, setStateParksGeojson] = useState<FeatureCollection<StateParksFeature> | null>(null);
 
+  useEffect(() => {
+    import('plotly.js-dist-min').then((module) => {
+      setPlotly(module.default);
+    });
+  }, []);
+
+  // Ensure we don't attempt to update after unmount
   const [initialCenter] = useState({ lat: 20.7, lon: -156.0 });
   // Fetch data (unchanged from your original)
   useEffect(() => {
@@ -662,13 +673,14 @@ export default function CombinedEverythingMap() {
       });
     }
 
-    const layout: Partial<Plotly.Layout> = {
+    // Layout: ensure mapbox.layers is explicitly set to the computed layers (possibly empty)
+    const layout: any = {
       autosize: true,
       mapbox: {
         style: 'carto-positron',
         center: initialCenter,
         zoom: 8.5,
-        layers: mapboxLayers,
+        layers: mapboxLayers, 
       },
       hovermode: 'closest',
       margin: { t: 0, l: 0, r: 0, b: 0 },
@@ -729,7 +741,8 @@ export default function CombinedEverythingMap() {
         'mapbox.center.lat': center.lat,
         'mapbox.center.lon': center.lon,
         'mapbox.zoom': center.zoom,
-      });
+      } as any
+    );
     }
   };
 
