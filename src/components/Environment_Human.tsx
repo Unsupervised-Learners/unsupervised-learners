@@ -69,6 +69,7 @@ export default function CombinedEverythingMap() {
   const [LULCGeojson, setLULCGeojson] = useState<FeatureCollection<LULCFeature> | null>(null);
   const[stateParksGeojson, setStateParksGeojson] = useState<FeatureCollection<StateParksFeature> | null>(null);
 
+  const [initialCenter] = useState({ lat: 20.7, lon: -156.0 });
   // Fetch data (unchanged from your original)
   useEffect(() => {
     let cancelled = false;
@@ -359,8 +360,9 @@ export default function CombinedEverythingMap() {
     }
 
     // Compute map center
-    let centerLat = 20.7;
-    let centerLon = -156.0;
+    // const [initialCenter] = useState({ lat: 20.7, lon: -156.0 });
+    // let centerLat = 20.7;
+    // let centerLon = -156.0;
 
     // Gather coordinates for centering
     const allCoords: Coordinate[] = selectedFeatures.flatMap(f => {
@@ -374,10 +376,10 @@ export default function CombinedEverythingMap() {
       return [];
     });
 
-    if (allCoords.length > 0) {
-      centerLat = allCoords.reduce((s, c) => s + c[1], 0) / allCoords.length;
-      centerLon = allCoords.reduce((s, c) => s + c[0], 0) / allCoords.length;
-    }
+    // if (allCoords.length > 0) {
+    //   centerLat = allCoords.reduce((s, c) => s + c[1], 0) / allCoords.length;
+    //   centerLon = allCoords.reduce((s, c) => s + c[0], 0) / allCoords.length;
+    // }
 
     // Build Mapbox layers array
     const mapboxLayers: any[] = [];
@@ -664,13 +666,14 @@ export default function CombinedEverythingMap() {
       autosize: true,
       mapbox: {
         style: 'carto-positron',
-        center: { lat: centerLat, lon: centerLon },
+        center: initialCenter,
         zoom: 8.5,
         layers: mapboxLayers,
       },
       hovermode: 'closest',
       margin: { t: 0, l: 0, r: 0, b: 0 },
-      showlegend: false
+      showlegend: false,
+      uirevision: 'constant' // Preserves user's pan/zoom
     };
 
     try {
