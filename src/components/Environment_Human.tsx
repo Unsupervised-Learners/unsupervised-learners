@@ -685,13 +685,13 @@ export default function CombinedEverythingMap() {
       showlegend: false,
       uirevision: 'constant' // Preserves user's pan/zoom
     };
-
+    
     try {
       if ((Plotly as any).react) {
-        (Plotly as any).react(divRef.current, traces, layout, { displayModeBar: true, responsive: true });
+        (Plotly as any).react(divRef.current, traces, layout, { displayModeBar: true, responsive: true, scrollZoom: true });
       } else {
         try { (Plotly as any).purge(divRef.current); } catch {}
-        Plotly.newPlot(divRef.current, traces, layout, { displayModeBar: true, responsive: true });
+        Plotly.newPlot(divRef.current, traces, layout, { displayModeBar: true, responsive: true, scrollZoom: true } );
       }
     } catch (err) {
       console.error('Plotly render error', err);
