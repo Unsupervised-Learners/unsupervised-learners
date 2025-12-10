@@ -9,7 +9,7 @@ export default function Footer() {
         background: '#fafafa',
       }}
     >
-      Department of Information and Computer Sciences · University of Hawaiʻi at Mānoa · Honolulu, HI 96822
+      NĀNĀ I KA ʻĀINA · Department of Information and Computer Sciences · University of Hawaiʻi at Mānoa · Honolulu, HI 96822
     </footer>
   );
 }
