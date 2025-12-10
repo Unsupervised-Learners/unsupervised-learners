@@ -1,7 +1,8 @@
-'use client';
+// app/data-sources/page.tsx
 
-import Environment_Human from '@/components/Environment_Human';
+import Data_Sources from "@/components/Data_Sources";
 
-export default function EnvironmentPage() {
-  return <Environment_Human />;
+export default function DataSourcesPage() {
+  return <Data_Sources />;
 }
+
