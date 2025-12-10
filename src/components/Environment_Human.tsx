@@ -441,7 +441,7 @@ export default function CombinedEverythingMap() {
         sourcetype: 'geojson' as const,
         source: roadsGeojson,
         type: 'line' as const,
-        color: '#000000',
+        color: 'rgba(0,0,0,0.35)',
         line: { width: 1,
           opacity: 0.4,
          },
@@ -866,7 +866,7 @@ export default function CombinedEverythingMap() {
       legendSections.push({
         title: 'Roads',
         items: [
-          { label: 'Road Network', color: '#000000' },
+          { label: 'Road Network', color: '#000000'},
         ]
       });
     }
