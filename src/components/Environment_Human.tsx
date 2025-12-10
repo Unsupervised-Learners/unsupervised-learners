@@ -531,56 +531,76 @@ export default function CombinedEverythingMap() {
     traces.push(dummyTrace);
 
     // Urban hover scatter (invisible markers, allow hover on urban)
+    // Urban hover scatter (lots of invisible points along polygons)
     if (showUrban && urbanGeojson) {
-      const centroidLat: number[] = [];
-      const centroidLon: number[] = [];
-      const urbanHoverText: string[] = [];
+      const hoverLat: number[] = [];
+      const hoverLon: number[] = [];
+      const hoverText: string[] = [];
 
       urbanGeojson.features.forEach((f) => {
-        const ring = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
-        const lat = ring.reduce((s, c) => s + c[1], 0) / ring.length;
-        const lon = ring.reduce((s, c) => s + c[0], 0) / ring.length;
-        centroidLat.push(lat);
-        centroidLon.push(lon);
-        urbanHoverText.push((f.properties as any).hoverText);
+        const geom = f.geometry;
+
+        // Use all boundary coordinates as hover hotspots
+        if (geom.type === 'Polygon') {
+          // outer ring
+          geom.coordinates[0].forEach(([lon, lat]) => {
+            hoverLat.push(lat);
+            hoverLon.push(lon);
+            hoverText.push((f.properties as any).hoverText);
+          });
+        } else if (geom.type === 'MultiPolygon') {
+          geom.coordinates.forEach((poly) => {
+            // outer ring of each polygon
+            poly[0].forEach(([lon, lat]) => {
+              hoverLat.push(lat);
+              hoverLon.push(lon);
+              hoverText.push((f.properties as any).hoverText);
+            });
+          });
+        }
       });
 
       traces.push({
         type: 'scattermapbox' as const,
-        lat: centroidLat,
-        lon: centroidLon,
+        lat: hoverLat,
+        lon: hoverLon,
         mode: 'markers',
-        marker: { size: 18, color: 'rgba(0,0,0,0)' },
-        text: urbanHoverText,
+        marker: {
+          size: 18,
+          color: 'rgba(0,0,0,0)', // fully invisible
+        },
+        text: hoverText,
         hovertemplate: '%{text}<extra></extra>',
         name: 'Urban Areas',
       });
     }
 
-    // Hotels
-    if (showHotels && hotelsGeojson) {
-      const hotelLat: number[] = [];
-      const hotelLon: number[] = [];
-      const hotelHoverText: string[] = [];
 
-      hotelsGeojson.features.forEach(f => {
-        const [lon, lat] = f.geometry.coordinates;
-        hotelLat.push(lat);
-        hotelLon.push(lon);
-        hotelHoverText.push((f.properties as any).hoverText);
-      });
 
-      traces.push({
-        type: 'scattermapbox' as const,
-        lat: hotelLat,
-        lon: hotelLon,
-        mode: 'markers',
-        marker: { size: 8, color: 'red', symbol: 'circle' },
-        text: hotelHoverText,
-        hovertemplate: '%{text}<extra></extra>',
-        name: 'Hotels',
-      });
-    }
+        // Hotels
+        if (showHotels && hotelsGeojson) {
+          const hotelLat: number[] = [];
+          const hotelLon: number[] = [];
+          const hotelHoverText: string[] = [];
+
+          hotelsGeojson.features.forEach(f => {
+            const [lon, lat] = f.geometry.coordinates;
+            hotelLat.push(lat);
+            hotelLon.push(lon);
+            hotelHoverText.push((f.properties as any).hoverText);
+          });
+
+          traces.push({
+            type: 'scattermapbox' as const,
+            lat: hotelLat,
+            lon: hotelLon,
+            mode: 'markers',
+            marker: { size: 8, color: 'red', symbol: 'circle' },
+            text: hotelHoverText,
+            hovertemplate: '%{text}<extra></extra>',
+            name: 'Hotels',
+          });
+        }
 
     // Plants / Habitat do not need separate scatter traces for hover because we use mapbox layers +
     // an invisible scatter for centroid hover if you prefer. We'll stick to hover via a small invisible scatter
