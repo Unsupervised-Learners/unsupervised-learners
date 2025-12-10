@@ -64,8 +64,9 @@ export default function Data_Sources() {
         <h1
           style={{
             textAlign: "center",
-            fontSize: "2.4rem",
+            fontSize: "3rem",
             marginBottom: "8px",
+            color: "#5B7A45",
           }}
         >
           Data Sources
@@ -80,8 +81,7 @@ export default function Data_Sources() {
             lineHeight: 1.6,
           }}
         >
-          Below are the datasets used in this project, including descriptions and
-          links to their original sources.
+          
         </p>
 
         <div style={{ display: "grid", gap: "24px" }}>
