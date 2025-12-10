@@ -16,11 +16,15 @@ export default function HomePage() {
       }}
     >
       <h1 style={{ fontSize: "3rem", marginBottom: "1rem", textShadow: "0 2px 6px rgba(0,0,0,0.4)" }}>
-        Welcome!
+        ALOHA MAI KĀKOU!
       </h1>
 
+      <h2 style={{ fontSize: "2rem", marginBottom: "1rem", textShadow: "0 2px 6px rgba(0,0,0,0.4)" }}>
+        E komo mai
+      </h2>
+
       <p style={{ fontSize: "1.25rem", maxWidth: "600px", textShadow: "0 2px 6px rgba(0,0,0,0.4)" }}>
-        Explore endangered plant species and human activity across the Hawaiian Islands.
+        Welcome to Nānā i ka ʻāina!
       </p>
 
       <a
