@@ -1,104 +1,128 @@
-import React from 'react';
-import { Col, Container, Row, Nav } from 'react-bootstrap';
-import { Linkedin } from 'react-bootstrap-icons';
+export default function AboutPage() {
+  return (
+    <div
+      style={{
+        padding: "80px 24px",
+        maxWidth: "900px",
+        margin: "0 auto",
+        lineHeight: 1.7,
+      }}
+    >
+      {/* ---- ABOUT THIS PROJECT ---- */}
+      <h1 style={{ textAlign: "center", marginBottom: "24px", fontSize: "2.5rem", color: "#5B7A45" }}>
+        ABOUT US
+      </h1>
 
-/* A simple static component to render some text for the landing page. */
-const AboutUs = () => (
-  <Container id="about-us-page" className="py-3 justify-content-center">
-    <Row className="align-items-center text-center">
-      <Col xs={12} className="text-center">
-        <h1 className="custom-header">ABOUT US</h1>
-        <p>
-          &apos;Imi Invasive aims to address invasive species management challenges by establishing a citizen science initiative to bring the community together
-          and educate people on invasive species, raising awareness and empowering the community and professionals to better track harmful species and care
-          for the ecosystem. It serves as an educational resource and a centralized app for reporting and managing invasive species across the Hawaiian Islands.
+      <p style={{ fontSize: "1.15rem", marginBottom: "48px" }}>
+        Our team set out to visualize environmental and human interaction data layered
+        on top of one another to help users draw conclusions, recognize patterns, and
+        become more familiar with the information being presented. We hope to pique
+        users’ interest in ecological data by allowing them to see how different
+        variables relate to one another and identify which areas might signal potential
+        issues or prompt further investigation. The visualization is designed to be
+        exploratory, encouraging users to dive into the data and form their own
+        interpretations. It is especially suited for an educational audience, such as
+        students or researchers, who want to understand how human activity and
+        environmental factors interact. We aim to help users recognize overlaps between
+        human-influenced areas and critical environmental regions, highlighting places
+        where human activity may threaten Hawaiʻi’s endangered species and ecosystems.
+        Users engage with the system by toggling different data layers, selecting those
+        that interest them, and observing the spatial patterns that emerge across these
+        interconnected datasets.
+      </p>
+
+      {/* --- HAWAIIAN PHRASE SECTION --- */}
+      <div style={{ textAlign: "center", marginBottom: "48px" }}>
+        <h2 style={{ fontSize: "1.8rem", marginBottom: "8px", color: "#5B7A45" }}>NĀNĀ I KA ʻĀINA</h2>
+        <p style={{ fontSize: "1.1rem", fontStyle: "italic" }}>
+          “Observe the land”
         </p>
-        <img
-          alt="Get to know us!"
-          src="/images/about.png"
-          className="img-fluid d-inline-block align-top about-us-img"
-        />
-        <h1>Meet The Team</h1>
-        <p>The team of creators is made up of five undergraduate students studying computer science at the University of Hawai&apos;i at Mānoa. </p>
-        <div>
-          <div className="card mb-3">
-            <div className="card-body">
-              <h5 className="card-title">Natalie Ching</h5>
-              <small className="text-muted">2nd Year - BS in CS (Data Science)</small>
-              <Nav.Link href="https://www.linkedin.com/in/natalie-ching-96749a253/"><Linkedin /></Nav.Link>
-              <p className="card-text">
-                Natalie grew up in Hawai&apos;i and is very interested in native wildlife. She participates in invasive seaweed clean-ups in Oahu and replanting projects. Natalie aspires to work in data science for a government agency.
-                <br />
-                <br />
-                Fun Fact: Natalie is 5th generation in Hawai&apos;i, and she can touch her elbows behind her head.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="card mb-3">
-            <div className="card-body">
-              <h5 className="card-title">Allison Ebsen</h5>
-              <small className="text-muted">2nd Year - BS in CS (General)</small>
-              <Nav.Link href="https://www.linkedin.com/in/allison-ebsen/"><Linkedin /></Nav.Link>
-              <p className="card-text">
-                Allison works in Agrosecurity and Agricultural Engineering, and she values the interconnectedness between the environment and our health. She’s currently exploring careers in computational biology.
-                <br />
-                <br />
-                Fun Fact: A childhood game that Allison loves is Pokemon Mystery Dungeon: Explorers of Sky.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="card mb-3">
-            <div className="card-body">
-              <h5 className="card-title">Lily Enanoria</h5>
-              <small className="text-muted">2nd Year - BS in CS (Cyber Security)</small>
-              <Nav.Link href="https://www.linkedin.com/in/lily-enanoria-0944aa2aa/ "><Linkedin /></Nav.Link>
-              <p className="card-text">
-                Lily grew up going to the beach with her &apos;ohana, and she loves interacting with nature. She loves opportunities to restore the &apos;āina. Lily aspires to work in cyber security for the government.
-                <br />
-                <br />
-                Fun Fact: Lily’s goal is to live in Japan one day.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="card mb-3">
-            <div className="card-body">
-              <h5 className="card-title">Myra Ortigosa</h5>
-              <small className="text-muted">2nd Year - BS in CS (Data Science)</small>
-              <Nav.Link href="https://www.linkedin.com/in/myra-angelica-ortigosa-5661a4275/ "><Linkedin /></Nav.Link>
-              <p className="card-text">
-                Myra cares about the environment and engages in community beach clean-ups, and she aspires to become a data scientist or data analyst.
-                <br />
-                <br />
-                Fun Fact: Myra recently got a takoyaki machine and wants to use it one day when she’s not busy.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="card mb-3">
-            <div className="card-body">
-              <h5 className="card-title">Gian Panoy</h5>
-              <small className="text-muted">2nd Year - BS in CS (General)</small>
-              <Nav.Link href="https://www.linkedin.com/in/gianpanoy/"><Linkedin /></Nav.Link>
-              <p className="card-text">
-                Gian is pursuing a career in software engineering. He is of Native Hawaiian descent and cares about the community and life here.
-                <br />
-                <br />
-                Fun Fact: Gian (aka Mr. Worldwide) has visited Canada, South Korea, and the Philippines.
-              </p>
-            </div>
-          </div>
+        <p style={{ marginTop: "12px", fontSize: "1rem" }}>
+          Our project reflects this mindset through visual exploration and our yellow
+          hibiscus logo honors Hawaiʻi’s state flower.
+        </p>
+      </div>
+
+      {/* ---- MEET THE TEAM ---- */}
+      <h2
+        style={{
+          textAlign: "center",
+          marginTop: "60px",
+          marginBottom: "40px",
+          fontSize: "2.5rem",
+          color: "#5B7A45"
+        }}
+      >
+        Meet the Team
+      </h2>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-start",
+          gap: "60px",
+          flexWrap: "nowrap", // keeps all 3 on one line
+          marginBottom: "80px",
+        }}
+      >
+        {/* ---- SHAELYN ---- */}
+        <div style={{ width: "260px", textAlign: "center" }}>
+          <img
+            src="/images/shaelyn_headshot.png"
+            alt="Shaelyn Loo"
+            style={{
+              width: "170px",
+              height: "170px",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+          <h3 style={{ marginTop: "16px" }}>Shaelyn Loo</h3>
+          <ul style={{ textAlign: "left", marginTop: "10px" }}>
+            <li>Undergraduate</li>
+            <li>Computer Science: Data Science</li>
+          </ul>
         </div>
 
-      </Col>
-    </Row>
-  </Container>
-);
+        {/* ---- NATALIE ---- */}
+        <div style={{ width: "260px", textAlign: "center" }}>
+          <img
+            src="/images/nat_headshot.jpeg"
+            alt="Natalie Ching"
+            style={{
+              width: "170px",
+              height: "170px",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+          <h3 style={{ marginTop: "16px" }}>Natalie Ching</h3>
+          <ul style={{ textAlign: "left", marginTop: "10px" }}>
+            <li>Undergraduate</li>
+            <li>Computer Science: Data Science</li>
+          </ul>
+        </div>
 
-export default AboutUs;
+        {/* ---- MYRA ---- */}
+        <div style={{ width: "260px", textAlign: "center" }}>
+          <img
+            src="/images/myra_headshot.jpg"
+            alt="Myra Ortigosa"
+            style={{
+              width: "170px",
+              height: "170px",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+          <h3 style={{ marginTop: "16px" }}>Myra Ortigosa</h3>
+          <ul style={{ textAlign: "left", marginTop: "10px" }}>
+            <li>Undergraduate</li>
+            <li>Computer Science: Data Science</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}

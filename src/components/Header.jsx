@@ -20,17 +20,41 @@ export default function Header() {
         zIndex: 50,
       }}
     >
-      <Link href="/" style={{ fontWeight: 600 }}>
+      {/* LEFT SIDE LOGO/TITLE */}
+      <Link
+        href="/"
+        style={{
+          fontWeight: 700,
+          fontSize: '1.2rem',
+          textDecoration: 'none',
+          color: "#5B7A45",
+        }}
+      >
         Mapping Endangered Plants
       </Link>
 
-      <nav style={{ display: 'flex', gap: '1rem' }}>
-        <Link href="/">Home</Link>
-        <Link href="/about">About</Link>
-        <Link href="/environment">Map</Link>
-        <Link href="/data-sources">Data Sources</Link>
+      {/* NAV LINKS */}
+      <nav style={{ display: 'flex', gap: '1.5rem' }}>
+        {[
+          { name: 'HOME', href: '/' },
+          { name: 'ABOUT', href: '/about' },
+          { name: 'MAP', href: '/environment' },
+          { name: 'DATA SOURCES', href: '/data-sources' },
+        ].map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            style={{
+              textDecoration: 'none',
+              fontWeight: 700,
+              color: "#5B7A45",
+              letterSpacing: '0.5px',
+            }}
+          >
+            {item.name}
+          </Link>
+        ))}
       </nav>
     </header>
   );
 }
-
