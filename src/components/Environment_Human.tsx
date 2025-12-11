@@ -293,7 +293,7 @@ export default function CombinedEverythingMap() {
           const landcover = String(p.landcover ?? '');
           p.fillColor = lulcColors[landcover] ?? '#cccccc';
           const label = lulcLabels[landcover] ?? 'Unknown';
-          p.hoverText = `Land Cover Code: ${landcover}<br>${label}<br>Area: ${p.st_areashape?.toLocaleString() ?? 'N/A'} sq units`;
+          p.hoverText = `Land Cover Code: ${landcover}<br>${label}<br>Area: ${p.st_areashape?.toLocaleString() ?? 'N/A'} sq meters`;
         });
 
         // State Parks
