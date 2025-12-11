@@ -1,12 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 
 export default function Header() {
+  const pathname = usePathname();
+
   return (
     <header
       style={{
-        height: '64px',
+        height: '80px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -20,20 +24,19 @@ export default function Header() {
         zIndex: 50,
       }}
     >
-      {/* LEFT SIDE LOGO/TITLE */}
-      <Link
-        href="/"
-        style={{
-          fontWeight: 700,
-          fontSize: '1.2rem',
-          textDecoration: 'none',
-          color: "#5B7A45",
-        }}
-      >
-        Mapping Endangered Plants
+      {/* LEFT LOGO */}
+      <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
+        <Image
+          src="/images/logo.png"
+          alt="Logo"
+          width={150}
+          height={80}
+          style={{ width: 'auto', height: '70px' }}
+          priority
+        />
       </Link>
 
-      {/* NAV LINKS */}
+      {/* NAV */}
       <nav style={{ display: 'flex', gap: '1.5rem' }}>
         {[
           { name: 'HOME', href: '/' },
@@ -44,12 +47,7 @@ export default function Header() {
           <Link
             key={item.href}
             href={item.href}
-            style={{
-              textDecoration: 'none',
-              fontWeight: 700,
-              color: "#5B7A45",
-              letterSpacing: '0.5px',
-            }}
+            className={`nav-link ${pathname === item.href ? 'active' : ''}`}
           >
             {item.name}
           </Link>

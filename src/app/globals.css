@@ -33,12 +33,15 @@ body {
 
 .nav-link {
   text-decoration: none;
-  color: #333;
-  font-size: 0.95rem;
+  font-weight: 700;
+  color: #5B7A45;      /* moved from inline */
+  letter-spacing: 0.5px;
+  font-size: 14px;
+  transition: color 0.2s ease-in-out;
 }
 
-.nav-link:hover,
-.site-title:hover {
+.nav-link:hover {
+  color: #c9dfbc;       /* your hover color */
   text-decoration: underline;
 }
 
@@ -57,5 +60,7 @@ body {
   font-size: 0.85rem;
   border-top: 1px solid #ddd;
   background: #fafafa;
+  width: 100%;
+  text-align: center;
 }
 
