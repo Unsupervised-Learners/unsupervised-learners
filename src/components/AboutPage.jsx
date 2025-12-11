@@ -88,7 +88,7 @@ export default function AboutPage() {
         {/* ---- NATALIE ---- */}
         <div style={{ width: "260px", textAlign: "center" }}>
           <img
-            src="/images/nat_headshot.jpeg"
+            src="/images/nat_headshot.jpg"
             alt="Natalie Ching"
             style={{
               width: "170px",
